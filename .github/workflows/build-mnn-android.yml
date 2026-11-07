@@ -1,1 +1,36 @@
+name: Build MNN Android
 
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build MNN
+        run: |
+          git submodule update --init --recursive
+          mkdir build
+          cd build
+          cmake ..
+          make -j4
+
+      - name: Build Android App
+        run: |
+          cd apps/Android/MnnLlmChat
+          ./gradlew assembleDebug
